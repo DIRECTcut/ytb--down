@@ -1,13 +1,15 @@
-const fs         = require("fs");
-const ytdl       = require("ytdl-core");
-const path       = require("path");
-const express    = require("express");
-const bodyParser = require("body-parser");
+const fs          = require("fs");
+const ytdl        = require("ytdl-core");
+const path        = require("path");
+const express     = require("express");
+const bodyParser  = require("body-parser");
+const favicon     = require("serve-favicon");
 
 const SERVER_PORT = process.env.PORT || 3000;
 const app         = express();
 
 app.use(bodyParser.json());
+app.use(favicon(path.join(__dirname, "favicon.ico")));
 
 app.get("/", (req, res) => {
   const document = path.join(__dirname, "/public/index.html");
