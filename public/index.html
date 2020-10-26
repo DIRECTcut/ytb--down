@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>YouTube Video Downloader</h1>
+    <p>
+        Insert a YouTube video link or an id. Valid examples are:
+    </p>
+    <ul>
+        <li>https://www.youtube.com/watch?v=GC80Dk7eg_A</li>
+        <li>/watch?v=GC80Dk7eg_A</li>
+        <li>GC80Dk7eg_A</li>
+    </ul>
+    <input id="linkInput" type="text" placeholder="Paste link...">
+    <input id="submitBtn" type="submit">
+    
+    <div id="downloadDiv">
+        <p>
+            Select a format. A download link will appear when the file is ready.
+        </p>
+        <label for="format">Choose a format:</label>
+        <select name="format" id="formatSelect"></select>
+        <button id="selectFormatBtn">Generate link</button>
+    </div>
+    
+</body>
+<script defer>
+    function renderVideoFormats(videoLink) {
+        fetch('/api/info', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8'
+            },
+            body: JSON.stringify({
+                "link": videoLink
+            })
+        })
+        .then(response => response.json())
+        .then(info => info.formats)
+        .then(formats => {
+            const formatSelect       = document.getElementById('formatSelect'),
+                  videoAudioOptgroup = document.createElement('optgroup'),
+                       videoOptgroup = document.createElement('optgroup'),
+                       audioOptgroup = document.createElement('optgroup');
+
+            formatSelect.innerHTML = '';
+
+            videoAudioOptgroup.setAttribute('label', 'Audio & Video');
+            videoOptgroup.setAttribute('label', 'Video only');
+            audioOptgroup.setAttribute('label', 'Audio only');
+
+            formatSelect.appendChild(videoAudioOptgroup);
+            formatSelect.appendChild(videoOptgroup);
+            formatSelect.appendChild(audioOptgroup);
+            
+            formats.forEach((format) => {
+                const {itag, container, codecs, mimeType, fps, qualityLabel, hasVideo, hasAudio = 'audio'} = format;
+                
+                const videoInfoText = (fps && qualityLabel) 
+                                    ? `${qualityLabel}, ${fps}fps; ${container}; codecs: "${codecs}"` 
+                                    : mimeType;
+
+                const option = document.createElement('option');
+
+                option.appendChild(document.createTextNode(videoInfoText));
+
+                if (hasVideo && hasAudio) videoAudioOptgroup.appendChild(option);
+                else if (hasVideo) videoOptgroup.appendChild(option);
+                else if (hasAudio) audioOptgroup.appendChild(option);
+
+                option.value = itag;
+            });
+        })
+    }
+
+    function renderDownloadLink(videoLink, itag) {
+        fetch('/api/download', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8'
+            },
+            body: JSON.stringify({
+                "link": videoLink,
+                "quality": itag
+            })
+        })
+        .catch(err => console.log(err))
+        .then(result => {
+            if (result.status === 200) {
+                console.log('Generating blob...')
+                const blob = result.blob();
+
+                blob.then(r => {
+                    console.log(`File ready. Total size~ ${Math.ceil(r.size/10e5)} Mb.`)
+                });
+                
+                console.time('Blob prepared in');
+
+                return blob;
+            }
+            else throw new Error('Error while preparing blob...');
+        })
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a'); 
+
+            a.id        = 'downloadBtn';
+            a.href      = url;
+            a.download  = 'your_video.flv';
+            a.innerText = 'Download!';
+            downloadDiv.appendChild(a);
+
+            console.timeEnd('Blob prepared in');
+        });
+    }
+
+    (function app() {
+        submitBtn.addEventListener('click', e => {
+            const downloadBtn = document.getElementById('downloadBtn');
+            if (downloadBtn) downloadBtn.remove();
+
+            renderVideoFormats(linkInput.value);
+        });  
+
+        selectFormatBtn.addEventListener('click', e => {
+            const downloadBtn = document.getElementById('downloadBtn');
+            if (downloadBtn) downloadBtn.remove();
+                
+            const itag = formatSelect.value || undefined;
+            const videoLink = linkInput.value || undefined;
+
+            if (videoLink && itag) renderDownloadLink(videoLink, itag);
+        })
+    })();
+</script>
+</html>
