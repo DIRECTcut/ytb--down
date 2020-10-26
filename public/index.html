@@ -74,6 +74,7 @@
                 else if (hasAudio) audioOptgroup.appendChild(option);
 
                 option.value = itag;
+                submitBtn.disabled = false;
             });
         })
     }
@@ -125,6 +126,7 @@
             if (downloadBtn) downloadBtn.remove();
 
             renderVideoFormats(linkInput.value);
+            submitBtn.setAttribute('disabled', 'true');
         });  
 
         selectFormatBtn.addEventListener('click', e => {
