@@ -26,6 +26,7 @@ app.get("/", (req, res) => {
 });
 
 app.post("/api/info", (req, res) => {
+  //TODO: implement server-side input validation (#1);
   ytdl.getInfo(req.body.link).then((result) => {
     res.setHeader("Content-Type", "application/json");
     res.end(JSON.stringify(result));
@@ -33,6 +34,7 @@ app.post("/api/info", (req, res) => {
 });
 
 app.post("/api/download", (req, res) => {
+  //TODO: implement server-side input validation (#1);
   const video = ytdl(req.body.link, { quality: req.body.quality });
   const stream = video.pipe(res);
 
@@ -45,7 +47,7 @@ app.post("/api/download", (req, res) => {
     });
   } catch (error) {
     res.statusCode = 400;
-    res.end(error.message);
+    res.end(JSON.stringify(error.message));
     console.log("Error ocurred:", error);
   }
 });

@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YT↔down</title>
-    <!-- <link rel="icon" type="image/png" href="./public/favicon.png"/> -->
 </head>
 <body>
     <h1>YouTube Video Downloader</h1>
@@ -16,7 +15,7 @@
         <li>/watch?v=GC80Dk7eg_A</li>
         <li>GC80Dk7eg_A</li>
     </ul>
-    <input id="linkInput" type="text" placeholder="Paste link...">
+    <input id="linkInput" type="text" placeholder="Insert a link or an ID...">
     <input id="submitBtn" type="submit">
     
     <div id="downloadDiv">
@@ -43,21 +42,8 @@
         .then(response => response.json())
         .then(info => info.formats)
         .then(formats => {
-            const formatSelect       = document.getElementById('formatSelect'),
-                  videoAudioOptgroup = document.createElement('optgroup'),
-                       videoOptgroup = document.createElement('optgroup'),
-                       audioOptgroup = document.createElement('optgroup');
-
-            formatSelect.innerHTML = '';
-
-            videoAudioOptgroup.setAttribute('label', 'Audio & Video');
-            videoOptgroup.setAttribute('label', 'Video only');
-            audioOptgroup.setAttribute('label', 'Audio only');
-
-            formatSelect.appendChild(videoAudioOptgroup);
-            formatSelect.appendChild(videoOptgroup);
-            formatSelect.appendChild(audioOptgroup);
             
+            clearFormatSelect();
             formats.forEach((format) => {
                 const {itag, container, codecs, mimeType, fps, qualityLabel, hasVideo, hasAudio = 'audio'} = format;
                 
@@ -120,21 +106,52 @@
         });
     }
 
+    function clearFormatSelect() {
+        const formatSelect          = document.getElementById('formatSelect'),
+                  videoAudioOptgroup = document.createElement('optgroup'),
+                       videoOptgroup = document.createElement('optgroup'),
+                       audioOptgroup = document.createElement('optgroup');
+
+            formatSelect.innerHTML = '';
+
+            videoAudioOptgroup.setAttribute('label', 'Audio & Video');
+            videoAudioOptgroup.setAttribute('id', 'videoAudioOptgroup');
+
+            videoOptgroup.setAttribute('label', 'Video only');
+            videoOptgroup.setAttribute('id', 'videoOptgroup');
+
+            audioOptgroup.setAttribute('label', 'Audio only');
+            audioOptgroup.setAttribute('id', 'audioOptgroup');
+
+            formatSelect.appendChild(videoAudioOptgroup);
+            formatSelect.appendChild(videoOptgroup);
+            formatSelect.appendChild(audioOptgroup);
+    }
+
+    function isQueryValid(query) {
+        return /.*[a-zA-Z0-9_-]{11}.*/.test(query);
+    }
+
     (function() {
         submitBtn.addEventListener('click', e => {
             const downloadBtn = document.getElementById('downloadBtn');
-            if (downloadBtn) downloadBtn.remove();
 
-            renderVideoFormats(linkInput.value);
-            submitBtn.setAttribute('disabled', 'true');
+            if (downloadBtn) downloadBtn.remove();
+            if (formatSelect.length !== 0) clearFormatSelect();
+
+            if (isQueryValid(linkInput.value)) {
+                renderVideoFormats(linkInput.value);
+                submitBtn.setAttribute('disabled', 'true');
+            } else alert('Query invalid');
+            
         });  
 
         selectFormatBtn.addEventListener('click', e => {
             const downloadBtn = document.getElementById('downloadBtn');
             if (downloadBtn) downloadBtn.remove();
                 
-            const itag = formatSelect.value || undefined;
-            const videoLink = linkInput.value || undefined;
+            const itag = formatSelect.value;
+            const videoLink = linkInput.value;
 
             if (videoLink && itag) renderDownloadLink(videoLink, itag);
         })
