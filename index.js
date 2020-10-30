@@ -4,6 +4,7 @@ const path        = require("path");
 const express     = require("express");
 const bodyParser  = require("body-parser");
 const favicon     = require("serve-favicon");
+const { rejects } = require("assert");
 
 const SERVER_PORT = process.env.PORT || 3000;
 const app         = express();
@@ -25,32 +26,44 @@ app.get("/", (req, res) => {
   });
 });
 
-app.post("/api/info", (req, res) => {
-  //TODO: implement server-side input validation (#1);
-  ytdl.getInfo(req.body.link).then((result) => {
-    res.setHeader("Content-Type", "application/json");
-    res.end(JSON.stringify(result));
-  });
+app.post("/api/info", async (request, response) => {
+  response.setHeader("Content-Type", "application/json");
+
+  try {
+    const videoFormats = await (await ytdl.getInfo(request.body.link)).formats;
+    response.statusCode = 200;
+    response.end(JSON.stringify(videoFormats));
+  } catch (error) {
+    response.statusCode = 404;
+    response.end(JSON.stringify({
+      "error": {
+        "message": error.message
+      }
+    }));
+  }
 });
 
 app.post("/api/download", (req, res) => {
   //TODO: implement server-side input validation (#1);
+
   const video = ytdl(req.body.link, { quality: req.body.quality });
   const stream = video.pipe(res);
 
-  res.setHeader("Content-Disposition", 'attachment; filename="video.flv"');
-  try {
-    stream.on("finish", () => {
-      res.statusCode = 200;
-      res.end();
-      console.log("File served");
+  stream.on('error', (error) => {
+    res.setHeader("Content-Type", "application/json");
+    res.statusCode = 404;
+    res.end(JSON.stringify({
+      "error": {
+        "message": error.message
+      } 
+    }));
+  });
+
+  stream.on("finish", () => {
+    res.statusCode = 200;
+    res.end();
     });
-  } catch (error) {
-    res.statusCode = 400;
-    res.end(JSON.stringify(error.message));
-    console.log("Error ocurred:", error);
-  }
-});
+  });
 
 app.listen(SERVER_PORT);
 console.log(`Listening on port ${SERVER_PORT}...`);

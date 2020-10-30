@@ -11,9 +11,9 @@
         Insert a YouTube video link or an id. Valid examples are:
     </p>
     <ul>
-        <li>https://www.youtube.com/watch?v=GC80Dk7eg_A</li>
-        <li>/watch?v=GC80Dk7eg_A</li>
-        <li>GC80Dk7eg_A</li>
+        <li>https://www.youtube.com/watch?v=oHg5SJYRHA0</li>
+        <li>/watch?v=oHg5SJYRHA0</li>
+        <li>oHg5SJYRHA0</li>
     </ul>
     <input id="linkInput" type="text" placeholder="Insert a link or an ID...">
     <input id="submitBtn" type="submit">
@@ -29,8 +29,35 @@
     
 </body>
 <script defer>
-    function renderVideoFormats(videoLink) {
-        fetch('/api/info', {
+    (function() {
+    submitBtn.addEventListener('click', e => {
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        if (downloadBtn) downloadBtn.remove();
+        if (formatSelect.length !== 0) clearFormatSelect();
+
+        if (isQueryValid(linkInput.value)) {
+            renderVideoFormats(linkInput.value);
+            submitBtn.setAttribute('disabled', 'true');
+        } else {
+            alert('No YouTube video ID found in query. Please, try again.');
+            linkInput.value = '';
+        }
+    });  
+
+    selectFormatBtn.addEventListener('click', e => {
+        const downloadBtn = document.getElementById('downloadBtn');
+        if (downloadBtn) downloadBtn.remove();
+            
+        const itag = formatSelect.value;
+        const videoLink = linkInput.value;
+
+        if (videoLink && itag) renderDownloadLink(videoLink, itag);
+        })
+    })();
+
+    function getVideoFormats(videoLink) {
+        return fetch('/api/info', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json;charset=utf-8'
@@ -39,10 +66,13 @@
                 "link": videoLink
             })
         })
-        .then(response => response.json())
-        .then(info => info.formats)
+        .catch(err => console.log(err))
+        .then(response => response.json());
+    }
+
+    function renderVideoFormats(videoLink) {
+        getVideoFormats(videoLink)
         .then(formats => {
-            
             clearFormatSelect();
             formats.forEach((format) => {
                 const {itag, container, codecs, mimeType, fps, qualityLabel, hasVideo, hasAudio = 'audio'} = format;
@@ -62,6 +92,11 @@
                 option.value = itag;
                 submitBtn.disabled = false;
             });
+        })
+        .catch( error => {
+            alert('Could not get video info');
+            linkInput.value = '';
+            submitBtn.disabled = false;
         })
     }
 
@@ -107,7 +142,7 @@
     }
 
     function clearFormatSelect() {
-        const formatSelect          = document.getElementById('formatSelect'),
+        const formatSelect           = document.getElementById('formatSelect'),
                   videoAudioOptgroup = document.createElement('optgroup'),
                        videoOptgroup = document.createElement('optgroup'),
                        audioOptgroup = document.createElement('optgroup');
@@ -132,29 +167,5 @@
         return /.*[a-zA-Z0-9_-]{11}.*/.test(query);
     }
 
-    (function() {
-        submitBtn.addEventListener('click', e => {
-            const downloadBtn = document.getElementById('downloadBtn');
-
-            if (downloadBtn) downloadBtn.remove();
-            if (formatSelect.length !== 0) clearFormatSelect();
-
-            if (isQueryValid(linkInput.value)) {
-                renderVideoFormats(linkInput.value);
-                submitBtn.setAttribute('disabled', 'true');
-            } else alert('Query invalid');
-            
-        });  
-
-        selectFormatBtn.addEventListener('click', e => {
-            const downloadBtn = document.getElementById('downloadBtn');
-            if (downloadBtn) downloadBtn.remove();
-                
-            const itag = formatSelect.value;
-            const videoLink = linkInput.value;
-
-            if (videoLink && itag) renderDownloadLink(videoLink, itag);
-        })
-    })();
 </script>
 </html>
