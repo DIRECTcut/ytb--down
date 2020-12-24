@@ -35,7 +35,7 @@ describe('API', () => {
                                 .send({"videoID": "qwerty"});
 
             expect(res).to.have.status(400);
-            expect(res.body.error).to.include('Invalid video ID');
+            expect(res.body.error).to.include('No video id found');
         });
     });
 
@@ -46,16 +46,22 @@ describe('API', () => {
                                 .send({
                                     "videoID": "OrxmtDw4pVI",
                                     "quality": "18" 
-                                })
-                                .then( (res) => {
-                                    expect(res).to.have.status(200);
-                                })
-                                .catch( (err) => {
-                                    throw err;
                                 });
+ 
+            expect(res).to.have.status(200);
+            expect(res).to.have.header('Content-Type', 'video/mp4');        
         }).timeout(0);
     
-        it('given videoID of a publically available video and an INvalid quality, responds with 400 and and error', async () => {});
+        it('given videoID of a publically available video but invalid quality, responds with 400 and and error', async () => {
+            const res = await request(server)
+                                .post('/api/download')
+                                .send({
+                                    "videoID": "OrxmtDw4pVI",
+                                    "quality": "19" 
+                                });
+            expect(res).to.have.status(400);
+            expect(res).to.be.json;   
+            expect(res.body.error).to.include('No such format found:');
+        });
     });
-
 });
