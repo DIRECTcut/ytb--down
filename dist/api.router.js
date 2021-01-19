@@ -18,13 +18,19 @@ const body_parser_1 = __importDefault(require("body-parser"));
 const router = express_1.default.Router();
 router.post('/info', body_parser_1.default.json(), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const videoID = req.body.videoID;
-    try {
-        ytdl_core_1.default.getInfo(videoID)
-            .then(info => res.json(info.formats));
+    const isIDValid = ytdl_core_1.default.validateID(videoID);
+    if (isIDValid) {
+        const response = yield ytdl_core_1.default.getInfo(videoID)
+            .then((result) => {
+            res.json(result.formats);
+        })
+            .catch(err => {
+            res.status(400).json({ error: err.message });
+            return err;
+        });
     }
-    catch (err) {
-        res.status(400).send({ error: err.message });
-        next();
+    else {
+        res.status(400).json({ error: `No video id found: ${videoID}` });
     }
 }));
 router.post('/download', body_parser_1.default.json(), (req, res, next) => {

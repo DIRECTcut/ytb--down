@@ -37,6 +37,30 @@ describe('API', () => {
             expect(res).to.have.status(400);
             expect(res.body.error).to.include('No video id found');
         });
+
+        it('given videoID of an unavailable video, responds with 400 and error', async () => {
+            const res = await request(server)
+                                .post('/api/info')
+                                .send({
+                                    "videoID": "U_RAWwgCwS1",
+                                    "quality": "19"
+                                });
+            expect(res).to.have.status(400);
+            expect(res).to.be.json;   
+            expect(res.body.error).to.include('Video unavailable');
+        });
+
+        it('given an invalid videoID, responds with 400 and error', async () => {
+            const res = await request(server)
+                                .post('/api/info')
+                                .send({
+                                    "videoID": "U_RAWwgCwS1)",
+                                    "quality": "19"
+                                });
+            expect(res).to.have.status(400);
+            expect(res).to.be.json;   
+            expect(res.body.error).to.include('No video id found');
+        });
     });
 
     describe('POST /api/download', () => {
@@ -52,7 +76,7 @@ describe('API', () => {
             expect(res).to.have.header('Content-Type', 'video/mp4');        
         }).timeout(0);
     
-        it('given videoID of a publically available video but invalid quality, responds with 400 and and error', async () => {
+        it('given videoID of a publically available video but invalid quality, responds with 400 and error', async () => {
             const res = await request(server)
                                 .post('/api/download')
                                 .send({
@@ -62,6 +86,6 @@ describe('API', () => {
             expect(res).to.have.status(400);
             expect(res).to.be.json;   
             expect(res.body.error).to.include('No such format found:');
-        });
+        }); 
     });
 });
