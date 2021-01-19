@@ -1,4 +1,4 @@
-import server from '../src/index'  
+import server from '../src/server/index'  
 import chaiHttp from 'chai-http'
 import chai from 'chai'
 
