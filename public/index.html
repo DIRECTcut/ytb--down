@@ -164,7 +164,9 @@
     }
 
     function isQueryValid(query) {
-        return /.*[a-zA-Z0-9_-]{11}.*/.test(query);
+        const regex = /^.*[a-zA-Z0-9_-]{11}$/g;
+        
+        return regex.test(query);
     }
 
 </script>

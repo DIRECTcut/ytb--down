@@ -38,7 +38,7 @@ describe('API', () => {
             expect(res.body.error).to.include('No video id found');
         });
 
-        it('given videoID of an unavailable video, responds with 400 and error', async () => {
+        it('given videoID of an unavailable video, responds with 400 and an Error', async () => {
             const res = await request(server)
                                 .post('/api/info')
                                 .send({
@@ -50,7 +50,7 @@ describe('API', () => {
             expect(res.body.error).to.include('Video unavailable');
         });
 
-        it('given an invalid videoID, responds with 400 and error', async () => {
+        it('given an invalid videoID, responds with 400 and an Error', async () => {
             const res = await request(server)
                                 .post('/api/info')
                                 .send({
@@ -76,7 +76,7 @@ describe('API', () => {
             expect(res).to.have.header('Content-Type', 'video/mp4');        
         }).timeout(0);
     
-        it('given videoID of a publically available video but invalid quality, responds with 400 and error', async () => {
+        it('given videoID of a publically available video but invalid quality, responds with 400 and an Error', async () => {
             const res = await request(server)
                                 .post('/api/download')
                                 .send({
