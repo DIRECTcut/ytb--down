@@ -21,10 +21,29 @@ router.post('/info', express.json(), async (req, res) => {
     }
 });
 
-router.post('/download', express.json(), (req, res, next) => {
+router.post('/title', express.json(), async (req, res) => {
+    const videoID = req.body.videoID;
+    const isIDValid = ytdl.validateID(videoID);
+
+    if (isIDValid) {
+        const videoTitle = (
+            await ytdl.getInfo(req.body.videoID)
+        ).videoDetails.title;
+
+        res.json(Buffer.from(videoTitle).toString('base64').slice(0, 5));
+    } else {
+        res.status(400).json({ error: `No video id found: ${videoID}` })
+    }
+})
+
+router.post('/download', express.json(), async (req, res, next) => {
+    const videoTitle = (await ytdl.getInfo(req.body.videoID)).videoDetails.title;
+
     const stream = ytdl(req.body.videoID, { quality: req.body.quality });
 
     res.setHeader('Content-Type', 'video/mp4');
+    res.setHeader('Content-Disposition', 'attachment');
+
     stream.pipe(res);
 
     stream.on('error', (err) => {
