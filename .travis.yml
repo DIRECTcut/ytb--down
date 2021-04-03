@@ -1,0 +1,16 @@
+language: node_js
+node_js:
+  - node
+before_deploy:
+  - npm run setup
+  - npm run build
+  - ls -la
+cache:
+  - node_modules
+deploy:
+  skip_cleanup: true
+  provider: heroku
+  api_key:
+    secure: eYbI1S5fc6vPXOc4WIB9fl24QZ0qfsxiz8WExxUQYW1HmF+n+r1ZiwgOtWIQ3XZsSgtkcCkj0Hi0Ku5edBol8Y3tDKU4Oqc7W++o3OoGj8IoeVYfEFIjeq6s6prG/QKNVFR5ZUwlSk9ZcsdGqsiN+bjEndOrkd4cjNwx6hOzdB+9nHjroVIE5k1UXFLcbjvjB44hVZOO6mbbWfEsKOCwAmUvARhgULQcGPiGi85m6gTYCFTeSR93oi2cbC8kIA8Qm50IUuI02/hQAtOPqKfAiLJ/yRIpU5S/VmJKfMyDsgmDBGms7pk4vxcoDwAZLoSdfi7mAhAUH2whZlc5CQhyrH+VpZGF7W5DhqjyPs8QMpMkpVngZeYZ/utA4IIhxvPDLixDv0bmZ9S1SHZRRe9A17OsrU5n+AZMds+WjCuFb15t/+sv17vKguKpzDmr5jA6svgdLAYVaj0CCdSiZrVsLpAwUx6T18AG58AiI3HC00BpGlkehmNwU2TgoZ5wKYdKTpylGvte8GSliYOqcCE95E1J46x+V5euNNe+gra46YQgyGYJ3Y6aDgHVxwUDSdipGzagbN5a/6jFRPvsFUGMwSem3Y3rCHZ7M8il9aZ92MhKbrCJZ0xOr7BqgKFvsfpXmWT+9OJkA+0SgZsxNVRfA9TfdTPW0hkFZVZ2CQNMbNU=
+  app:
+    travis: yt--down
