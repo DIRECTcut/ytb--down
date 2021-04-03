@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha -r ts-node/register tests/**/*.spec.ts --exit",
-    "start": "npm install && tsc && node dist/index.js",
-    "dev": "./node_modules/.bin/tsc-watch --onSuccess \"node ./dist/index.js\""
+    "start": "npm install && npm run tsc && node dist/index.js",
+    "dev": "./node_modules/.bin/tsc-watch --onSuccess \"node ./dist/index.js\"",
+    "tsc": "tsc"
   },
   "keywords": [],
   "author": "",
