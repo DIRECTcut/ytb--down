@@ -3,6 +3,7 @@ import path from 'path';
 import ytdl from 'ytdl-core';
 import fs from 'fs';
 import getVideoTitle from '../helpers/getVideoTitle';
+import config from '../config';
 
 const router = express.Router();
 
@@ -51,10 +52,8 @@ router.post('/download', express.json(), async (req, res, next) => {
 });
 
 router.post('/network-stream', express.json(), async (req, res) => {
-  const VIDS_FOLDER_PATH = path.join('./public', 'vids');
-
   const fileName = await getVideoTitle(req.body.videoID);
-  const filePath = path.join(VIDS_FOLDER_PATH, fileName ?? 'VIDEO');
+  const filePath = path.join(config.VIDS_FOLDER_PATH, fileName ?? 'VIDEO');
 
   const stream = ytdl(req.body.videoID, { quality: req.body.quality });
 
