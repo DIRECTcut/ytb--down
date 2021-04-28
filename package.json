@@ -7,7 +7,7 @@
     "setup": "npm install",
     "build": "tsc",
     "test": "mocha -r ts-node/register tests/**/*.spec.ts --exit",
-    "start": "npm run setup && node dist/index.js",
+    "start": "npm run setup && node dist/server/index.js",
     "dev": "./node_modules/.bin/tsc-watch --onSuccess \"node ./dist/server/index.js\"",
     "lint": "npx eslint . --ext .ts",
     "lint:fix": "npx eslint . --ext .ts --fix"
