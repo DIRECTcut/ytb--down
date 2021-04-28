@@ -19,19 +19,39 @@
     </ul>
     <input id="linkInput" type="text" placeholder="Insert a link or an ID...">
     <input id="submitBtn" type="submit">
+    <label for="format">Choose a format:</label>
+    <select name="format" id="formatSelect"></select>
 
     <div id="downloadDiv">
         <p>
-            Select a format. A download link will appear when the file is ready.
+            Download a video file. A download link will appear when the file is ready.
         </p>
-        <label for="format">Choose a format:</label>
-        <select name="format" id="formatSelect"></select>
-        <button id="selectFormatBtn">Generate link</button>
+        <button id="selectFormatBtn">Generate download link</button>
+    </div>
+    <div id="networkStreamDiv">
+        <p>
+            Or create an HTTP network stream of a file:
+        </p>
+        <button id="createNetworkStreamBtn">Create network stream</button>
+        <span id="networkStreamUrlSpan"></span>
     </div>
 
 </body>
 <script defer>
     (function () {
+        createNetworkStreamBtn.addEventListener('click', async e => {
+            const itag    = formatSelect.value;
+            const videoID = linkInput.value;
+
+            networkStreamUrlSpan.innerText = null;
+
+            if (videoID && itag) {
+                const response = await getNetworkStreamUrl(videoID, itag)
+
+                networkStreamUrlSpan.innerText = response;
+            }
+        })
+
         submitBtn.addEventListener('click', e => {
             const downloadBtn = document.getElementById('downloadBtn');
 
@@ -71,6 +91,22 @@
             .catch(err => console.log(err))
             .then(response => response.json());
     }
+
+    async function getNetworkStreamUrl(videoID, itag) {
+                const response = await fetch('/api/network-stream', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json;charset=utf-8'
+                    },
+                    body: JSON.stringify({
+                        videoID,
+                        "quality": itag
+                    })
+                })
+                    .catch(err => console.log(err));
+
+                return response.json();
+            }
 
     function renderVideoFormats(videoLink) {
         getVideoFormats(videoLink)
