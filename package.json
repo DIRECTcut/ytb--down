@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "setup": "npm install",
+    "setup:ci": "npm ci",
     "build": "tsc",
     "test": "mocha -r ts-node/register tests/**/*.spec.ts --exit",
     "start": "npm run setup && node dist/server/index.js",
