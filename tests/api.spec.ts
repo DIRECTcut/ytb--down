@@ -94,7 +94,7 @@ describe('API', function () {
     });
   });
 
-  describe.only('POST /api/network-stream', () => {
+  describe('POST /api/network-stream', () => {
     it('given videoID of a publically available video and valid quality, responds with 200 and a valid url', async () => {
       const res = await request(server)
         .post('/api/network-stream')

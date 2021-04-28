@@ -50,34 +50,28 @@ router.post('/download', express.json(), async (req, res, next) => {
   });
 });
 
-router.post('/network-stream', express.json(), async (req, res, next) => {
+router.post('/network-stream', express.json(), async (req, res) => {
   const VIDS_FOLDER_PATH = path.join('./public', 'vids');
 
   const fileName = await getVideoTitle(req.body.videoID);
-  const filePath = path.join(VIDS_FOLDER_PATH, fileName as string);
+  const filePath = path.join(VIDS_FOLDER_PATH, fileName ?? 'VIDEO');
 
   const stream = ytdl(req.body.videoID, { quality: req.body.quality });
 
-  fs.access(VIDS_FOLDER_PATH, (err) => {
-    if (err) fs.mkdirSync(VIDS_FOLDER_PATH);
+  const writeStream = fs.createWriteStream(filePath);
+  stream.pipe(writeStream);
 
-    const writeStream = fs.createWriteStream(filePath);
+  stream.on('error', (streamErr) => {
+    res.removeHeader('Content-Type');
+    res.status(400).send({ error: streamErr.message });
+  });
 
-    stream.pipe(writeStream);
+  stream.on('finish', () => {
+    const networkStreamUrl = `${req.protocol
+    }://${
+      path.join(req.get('host') as string, 'vids', fileName as string)}`;
 
-    stream.on('error', (streamErr) => {
-      res.removeHeader('Content-Type');
-      res.status(400).send({ error: streamErr.message });
-      next();
-    });
-
-    stream.on('finish', () => {
-      const networkStreamUrl = `${req.protocol
-      }://${
-        path.join(req.get('host') as string, 'vids', fileName as string)}`;
-
-      res.json(networkStreamUrl);
-    });
+    res.json(networkStreamUrl);
   });
 });
 
