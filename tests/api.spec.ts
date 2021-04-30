@@ -1,7 +1,8 @@
 import chaiHttp from 'chai-http';
 import chai from 'chai';
 import fs from 'fs';
-import server from '../src/server/index';
+import server from '../src/index';
+import config from '../src/config';
 
 /* eslint-disable func-names */
 /* eslint-disable no-unused-expressions */
